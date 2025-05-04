@@ -7,11 +7,13 @@ import (
 
 type MerkleTree struct {
 	Transactions []string
+	Filter       *BloomFilter
 }
 
 func NewMerkleTree() *MerkleTree {
 	return &MerkleTree{
 		Transactions: make([]string, 0),
+		Filter:       NewBloomFilter(1024, 3),
 	}
 }
 
@@ -37,6 +39,7 @@ func (amf *AdaptiveMerkleForest) AddTransaction(shardID, tx string) {
 		amf.Shards[shardID] = tree
 	}
 	tree.Transactions = append(tree.Transactions, tx)
+	tree.Filter.Add(tx)
 }
 
 func (amf *AdaptiveMerkleForest) RandomShardID() string {

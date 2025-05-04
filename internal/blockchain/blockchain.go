@@ -18,9 +18,17 @@ type Blockchain struct {
 }
 
 func NewBlockchain() *Blockchain {
+	engine := consensus.NewHybridConsensus()
+
+	// Register a few default nodes
+	engine.RegisterNode("node-1", 100)
+	engine.RegisterNode("node-2", 80)
+	engine.RegisterNode("node-3", 60)
+	engine.RegisterNode("node-4", 40)
+
 	return &Blockchain{
 		MerkleForest:    merkle.NewAdaptiveMerkleForest(),
-		ConsensusEngine: consensus.NewHybridConsensus(),
+		ConsensusEngine: engine,
 		blocks:          0,
 	}
 }
@@ -42,6 +50,9 @@ func (bc *Blockchain) Start() {
 
 		// Check and rebalance shards if needed
 		shard.CheckRebalance(bc.MerkleForest)
+
+		// Hybrid consensus to propose the block
+		bc.ConsensusEngine.ProposeBlock()
 
 		bc.blocks++
 		bc.mu.Unlock()
